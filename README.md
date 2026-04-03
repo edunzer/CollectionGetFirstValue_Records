@@ -19,6 +19,8 @@ If the record collection is null, empty, or the field value is null, the respons
 - Works with **any SObject**
 - Field selection via **dynamic Field API Name**
 - Null-safe for records and field values
+- Bulk-safe: each request is processed independently — one invalid field name or bad request does not fail others
+- Per-request error reporting via the `errorMessage` output variable
 - No DML or SOQL
 - Uses `with sharing` to respect org security
 
@@ -36,8 +38,10 @@ If the record collection is null, empty, or the field value is null, the respons
 ## Behavior Notes
 
 - The first record is determined by the **existing collection order**
-- No sorting or validation of the field API name is performed
-- If the field does not exist or the value is null, the response is `null`
+- If `fieldApiName` is blank, `response` is `null` and `errorMessage` is populated
+- If the field does not exist on the SObject, `response` is `null` and `errorMessage` contains the exception detail
+- If the field value is `null`, `response` is `null` and `errorMessage` is also `null`
 - All returned values are converted to **String**
+- When multiple requests are passed (bulk invocation), each is processed independently so that one failing request does not affect the others
 
 ---
