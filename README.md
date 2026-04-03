@@ -36,8 +36,8 @@ If the record collection is null, empty, or the field value is null, the respons
 ## Behavior Notes
 
 - The first record is determined by the **existing collection order**
-- No sorting or validation of the field API name is performed
-- If the field does not exist or the value is null, the response is `null`
+- If the provided `fieldApiName` does not exist on the SObject, an `IllegalArgumentException` is thrown with a descriptive message
+- If the field value is null, the response is `null`
 - All returned values are converted to **String**
 
 ---

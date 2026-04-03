@@ -36,6 +36,27 @@ public with sharing class CollectionGetFirstValue_RecordsTest {
     }
 
     @IsTest
+    static void testGetFirstValue_InvalidFieldApiName() {
+        Account a = new Account(Name = 'Test Account');
+
+        CollectionGetFirstValue_Records.Request req = new CollectionGetFirstValue_Records.Request();
+        req.records = new List<SObject>{ a };
+        req.fieldApiName = 'NonExistentField__xyz';
+
+        List<CollectionGetFirstValue_Records.Request> requests = new List<CollectionGetFirstValue_Records.Request>{ req };
+
+        try {
+            CollectionGetFirstValue_Records.getFirstValue(requests);
+            System.assert(false, 'Expected IllegalArgumentException was not thrown for invalid field API name');
+        } catch (IllegalArgumentException e) {
+            System.assert(e.getMessage().contains('NonExistentField__xyz'), 'Exception message should contain the invalid field name');
+            System.assert(e.getMessage().contains('Account'), 'Exception message should contain the SObject type name');
+        } catch (Exception e) {
+            System.assert(false, 'Unexpected exception type thrown: ' + e.getTypeName() + ' - ' + e.getMessage());
+        }
+    }
+
+    @IsTest
     static void testGetFirstValue_NullRecordsField() {
         CollectionGetFirstValue_Records.Request req = new CollectionGetFirstValue_Records.Request();
         req.records = null;
