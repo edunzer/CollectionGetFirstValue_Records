@@ -14,6 +14,13 @@ public with sharing class CollectionGetFirstValue_Records {
             }
 
             SObject firstRecord = req.records[0];
+
+            if (firstRecord == null || String.isBlank(req.fieldApiName)) {
+                resp.response = null;
+                results.add(resp);
+                continue;
+            }
+
             Object fieldValue = firstRecord.get(req.fieldApiName);
 
             resp.response = (fieldValue == null) ? null : String.valueOf(fieldValue);

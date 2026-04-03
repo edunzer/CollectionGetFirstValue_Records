@@ -49,4 +49,50 @@ public with sharing class CollectionGetFirstValue_RecordsTest {
         System.assertEquals(null, responses[0].response, 'Null records should result in null response');
     }
 
+    @IsTest
+    static void testGetFirstValue_NullFirstRecord() {
+        CollectionGetFirstValue_Records.Request req = new CollectionGetFirstValue_Records.Request();
+        req.records = new List<SObject>{ null };
+        req.fieldApiName = 'Name';
+
+        List<CollectionGetFirstValue_Records.Request> requests = new List<CollectionGetFirstValue_Records.Request>{ req };
+
+        List<CollectionGetFirstValue_Records.Response> responses = CollectionGetFirstValue_Records.getFirstValue(requests);
+
+        System.assertEquals(1, responses.size());
+        System.assertEquals(null, responses[0].response, 'Null first record should result in null response');
+    }
+
+    @IsTest
+    static void testGetFirstValue_NullFieldApiName() {
+        Account a = new Account(Name = 'Test Account');
+
+        CollectionGetFirstValue_Records.Request req = new CollectionGetFirstValue_Records.Request();
+        req.records = new List<SObject>{ a };
+        req.fieldApiName = null;
+
+        List<CollectionGetFirstValue_Records.Request> requests = new List<CollectionGetFirstValue_Records.Request>{ req };
+
+        List<CollectionGetFirstValue_Records.Response> responses = CollectionGetFirstValue_Records.getFirstValue(requests);
+
+        System.assertEquals(1, responses.size());
+        System.assertEquals(null, responses[0].response, 'Null fieldApiName should result in null response');
+    }
+
+    @IsTest
+    static void testGetFirstValue_BlankFieldApiName() {
+        Account a = new Account(Name = 'Test Account');
+
+        CollectionGetFirstValue_Records.Request req = new CollectionGetFirstValue_Records.Request();
+        req.records = new List<SObject>{ a };
+        req.fieldApiName = '   ';
+
+        List<CollectionGetFirstValue_Records.Request> requests = new List<CollectionGetFirstValue_Records.Request>{ req };
+
+        List<CollectionGetFirstValue_Records.Response> responses = CollectionGetFirstValue_Records.getFirstValue(requests);
+
+        System.assertEquals(1, responses.size());
+        System.assertEquals(null, responses[0].response, 'Blank fieldApiName should result in null response');
+    }
+
 }
