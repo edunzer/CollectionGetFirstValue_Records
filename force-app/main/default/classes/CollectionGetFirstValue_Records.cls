@@ -13,10 +13,22 @@ public with sharing class CollectionGetFirstValue_Records {
                 continue;
             }
 
-            SObject firstRecord = req.records[0];
-            Object fieldValue = firstRecord.get(req.fieldApiName);
+            if (String.isBlank(req.fieldApiName)) {
+                resp.response = null;
+                resp.errorMessage = 'The fieldApiName parameter is required and cannot be blank.';
+                results.add(resp);
+                continue;
+            }
 
-            resp.response = (fieldValue == null) ? null : String.valueOf(fieldValue);
+            try {
+                SObject firstRecord = req.records[0];
+                Object fieldValue = firstRecord.get(req.fieldApiName);
+                resp.response = (fieldValue == null) ? null : String.valueOf(fieldValue);
+            } catch (SObjectException e) {
+                resp.response = null;
+                resp.errorMessage = e.getMessage();
+            }
+
             results.add(resp);
         }
 
@@ -34,5 +46,8 @@ public with sharing class CollectionGetFirstValue_Records {
     public class Response {
         @InvocableVariable(label='Response' description='Single text response containing the first field value')
         public String response;
+
+        @InvocableVariable(label='Error Message' description='Contains error details if the field value could not be retrieved; null when successful.')
+        public String errorMessage;
     }
 }

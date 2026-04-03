@@ -49,4 +49,55 @@ public with sharing class CollectionGetFirstValue_RecordsTest {
         System.assertEquals(null, responses[0].response, 'Null records should result in null response');
     }
 
+    @IsTest
+    static void testGetFirstValue_BlankFieldApiName() {
+        Account a = new Account(Name = 'Test Account');
+
+        CollectionGetFirstValue_Records.Request req = new CollectionGetFirstValue_Records.Request();
+        req.records = new List<SObject>{ a };
+        req.fieldApiName = '';
+
+        List<CollectionGetFirstValue_Records.Request> requests = new List<CollectionGetFirstValue_Records.Request>{ req };
+
+        List<CollectionGetFirstValue_Records.Response> responses = CollectionGetFirstValue_Records.getFirstValue(requests);
+
+        System.assertEquals(1, responses.size());
+        System.assertEquals(null, responses[0].response, 'Blank fieldApiName should result in null response');
+        System.assertNotEquals(null, responses[0].errorMessage, 'Blank fieldApiName should populate errorMessage');
+    }
+
+    @IsTest
+    static void testGetFirstValue_InvalidFieldApiName_DoesNotBreakBatch() {
+        Account testAccount = new Account(Name = 'Good Account');
+
+        // Request 1: valid field
+        CollectionGetFirstValue_Records.Request reqGood = new CollectionGetFirstValue_Records.Request();
+        reqGood.records = new List<SObject>{ testAccount };
+        reqGood.fieldApiName = 'Name';
+
+        // Request 2: invalid field — should not cause Request 1 or 3 to fail
+        CollectionGetFirstValue_Records.Request reqBad = new CollectionGetFirstValue_Records.Request();
+        reqBad.records = new List<SObject>{ testAccount };
+        reqBad.fieldApiName = 'NonExistentField__xyz';
+
+        // Request 3: another valid field
+        CollectionGetFirstValue_Records.Request reqGood2 = new CollectionGetFirstValue_Records.Request();
+        reqGood2.records = new List<SObject>{ testAccount };
+        reqGood2.fieldApiName = 'Name';
+
+        List<CollectionGetFirstValue_Records.Request> requests = new List<CollectionGetFirstValue_Records.Request>{ reqGood, reqBad, reqGood2 };
+
+        Test.startTest();
+        List<CollectionGetFirstValue_Records.Response> responses = CollectionGetFirstValue_Records.getFirstValue(requests);
+        Test.stopTest();
+
+        System.assertEquals(3, responses.size(), 'Should return a response for each request even when one has an invalid field');
+        System.assertEquals('Good Account', responses[0].response, 'Valid request before the bad one should succeed');
+        System.assertEquals(null, responses[0].errorMessage, 'Valid request should have no error');
+        System.assertEquals(null, responses[1].response, 'Invalid field should result in null response');
+        System.assertNotEquals(null, responses[1].errorMessage, 'Invalid field should populate errorMessage');
+        System.assertEquals('Good Account', responses[2].response, 'Valid request after the bad one should succeed');
+        System.assertEquals(null, responses[2].errorMessage, 'Valid request should have no error');
+    }
+
 }
