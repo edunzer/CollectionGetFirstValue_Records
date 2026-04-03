@@ -14,6 +14,16 @@ public with sharing class CollectionGetFirstValue_Records {
             }
 
             SObject firstRecord = req.records[0];
+
+            Schema.SObjectType sObjectType = firstRecord.getSObjectType();
+            Map<String, Schema.SObjectField> fieldMap = sObjectType.getDescribe().fields.getMap();
+
+            if (!fieldMap.containsKey(req.fieldApiName.toLowerCase())) {
+                throw new IllegalArgumentException(
+                    'Invalid field API name \'' + req.fieldApiName + '\' for SObject type \'' + sObjectType.getDescribe().getName() + '\'.'
+                );
+            }
+
             Object fieldValue = firstRecord.get(req.fieldApiName);
 
             resp.response = (fieldValue == null) ? null : String.valueOf(fieldValue);
